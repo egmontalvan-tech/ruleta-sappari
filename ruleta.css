@@ -326,9 +326,12 @@ button:disabled {
 .modal-content {
     position: relative;
     width: min(100%, 460px);
+    max-height: min(92dvh, 760px);
     padding: 34px 28px;
     text-align: center;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-celebration {
@@ -360,7 +363,12 @@ button:disabled {
 .modal-content h2,
 .modal-content .modal-eyebrow,
 #prizeText,
-.modal-content button {
+.modal-content button,
+.claim-box,
+.claim-instructions,
+.claim-value,
+.claim-code,
+.claim-date {
     position: relative;
     z-index: 1;
 }
@@ -387,6 +395,7 @@ button:disabled {
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 16px;
+    text-align: left;
 }
 
 .claim-label {
@@ -401,18 +410,19 @@ button:disabled {
     margin-top: 14px;
 }
 
-.claim-code {
-    font-size: clamp(1.5rem, 5vw, 2rem);
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    color: var(--gold-light);
-    font-family: "Courier New", Courier, monospace;
-    word-break: break-all;
-}
-
 .claim-value {
     font-size: 1rem;
     color: var(--paper);
+    word-break: break-word;
+}
+
+.claim-code {
+    font-size: clamp(1.1rem, 4vw, 1.55rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--gold-light);
+    font-family: "Courier New", Courier, monospace;
+    word-break: break-all;
 }
 
 .claim-date {
