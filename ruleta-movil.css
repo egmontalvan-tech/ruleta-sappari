@@ -1,0 +1,148 @@
+/* Estilos móvil — se activan con .layout-movil vía JavaScript */
+
+html.layout-movil {
+    -webkit-text-size-adjust: 100%;
+}
+
+body.layout-movil {
+    min-height: 100dvh;
+    background-attachment: scroll;
+    padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+}
+
+body.layout-movil .container {
+    justify-content: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    gap: 20px;
+    min-height: 100dvh;
+}
+
+body.layout-movil .hero {
+    gap: 6px;
+    padding-top: 4px;
+}
+
+body.layout-movil .logo-top {
+    width: 96px;
+}
+
+body.layout-movil .eyebrow {
+    letter-spacing: 0.22em;
+    font-size: 0.62rem;
+}
+
+body.layout-movil h1 {
+    font-size: clamp(1.65rem, 8vw, 2.2rem);
+    letter-spacing: 0.05em;
+    line-height: 1.15;
+}
+
+body.layout-movil .subtitle {
+    font-size: 0.92rem;
+    padding: 0 8px;
+}
+
+body.layout-movil .form-container {
+    width: 100%;
+    max-width: none;
+    padding: 20px 16px;
+    border-radius: 20px;
+}
+
+body.layout-movil .form-container h2 {
+    font-size: 1.45rem;
+}
+
+body.layout-movil .form-container input {
+    padding: 16px;
+    font-size: 16px;
+    min-height: 52px;
+}
+
+body.layout-movil button {
+    width: 100%;
+    min-height: 52px;
+    font-size: 1rem;
+    touch-action: manipulation;
+}
+
+body.layout-movil .ruleta-section {
+    width: 100%;
+    gap: 16px;
+}
+
+body.layout-movil .wheel-container {
+    width: min(94vw, 380px);
+    margin: 0 auto;
+}
+
+body.layout-movil .wheel-glow {
+    inset: -12px;
+    filter: blur(14px);
+}
+
+body.layout-movil .pointer::after {
+    border-left-width: 13px;
+    border-right-width: 13px;
+    border-top-width: 24px;
+}
+
+body.layout-movil .pointer-cap {
+    width: 18px;
+    height: 18px;
+}
+
+body.layout-movil .logo-center {
+    width: clamp(72px, 22vw, 98px);
+    height: clamp(72px, 22vw, 98px);
+    border-width: 3px;
+}
+
+body.layout-movil .logo-center img {
+    width: clamp(48px, 14vw, 64px);
+    height: clamp(48px, 14vw, 64px);
+}
+
+body.layout-movil #spinBtn {
+    width: min(94vw, 380px);
+    max-width: 100%;
+    min-width: 0;
+    position: sticky;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 5;
+}
+
+body.layout-movil .modal {
+    align-items: flex-end;
+    padding: 0;
+}
+
+body.layout-movil .modal-content {
+    width: 100%;
+    max-width: none;
+    border-radius: 24px 24px 0 0;
+    padding: 28px 20px max(28px, env(safe-area-inset-bottom));
+    margin: 0;
+}
+
+body.layout-movil .modal-content h2 {
+    font-size: 2rem;
+}
+
+body.layout-movil #prizeText {
+    font-size: 1.35rem;
+}
+
+@media (max-width: 380px) {
+    body.layout-movil h1 {
+        font-size: 1.5rem;
+    }
+
+    body.layout-movil .wheel-container {
+        width: 92vw;
+    }
+}
