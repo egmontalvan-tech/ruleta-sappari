@@ -1,181 +1,53 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAPPARI - Ruleta de la Fortuna</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #0a0a0a;
-            color: #fff;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        h1 { 
-            color: #E50914; 
-            margin-bottom: 5px; 
-            font-size: 28px; 
-            text-transform: uppercase; 
-            letter-spacing: 3px;
-            text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
-        }
-        p { color: #888; margin-bottom: 30px; font-size: 14px; text-align: center; max-width: 300px; }
-        
-        .wheel-container { 
-            position: relative; 
-            width: 340px; 
-            height: 340px; 
-            margin-bottom: 35px;
-        }
-        
-        canvas { 
-            width: 100%; 
-            height: 100%; 
-            border-radius: 50%; 
-            box-shadow: 0 0 35px rgba(229, 9, 20, 0.4); 
-            border: 8px solid #1a1a1a; 
-            background: #111;
-        }
-        
-        .pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 14px solid transparent;
-            border-right: 14px solid transparent;
-            border-top: 28px solid #E50914;
-            z-index: 15;
-            filter: drop-shadow(0 2px 5px rgba(229, 9, 20, 0.5));
-        }
-        
-        /* Botón central interactivo con el logo vectorial de SAPPARI incorporado */
-        .spin-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85px;
-            height: 85px;
-            background-color: #ffffff;
-            border: 4px solid #E50914;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(229, 9, 20, 0.7);
-            z-index: 12;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-        .spin-btn:active {
-            transform: translate(-50%, -50%) scale(0.92);
-        }
-        .spin-btn svg {
-            width: 90%;
-            height: 90%;
-        }
-        
-        .result-box {
-            font-size: 15px;
-            font-weight: 600;
-            color: #4CD964;
-            text-align: center;
-            min-height: 55px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 320px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPPARI MANTA - RULETA</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
-    <h1>SAPPARI</h1>
-    <p>Toca el logo central para girar la ruleta y descubrir tu beneficio de hoy.</p>
+<div class="container">
+
+    <h1>🍣 SAPPARI MANTA</h1>
+    <p class="subtitle">Gira la ruleta y gana increíbles premios</p>
 
     <div class="wheel-container">
+
         <div class="pointer"></div>
-        <canvas id="wheel" width="340" height="340"></canvas>
-        <button class="spin-btn" id="spinBtn">
-            <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="#000000" stroke-width="3"/>
-                <path d="M 50 4 A 46 46 0 0 0 50 96 A 23 23 0 0 1 50 50 A 23 23 0 0 0 50 4" fill="#E50914"/>
-                <path d="M 50 4 A 46 46 0 0 1 50 96 A 23 23 0 0 1 50 50 A 23 23 0 0 0 50 4" fill="#000000"/>
-                <path d="M 50 50 A 23 23 0 0 0 50 96" fill="none" stroke="#ffffff" stroke-width="1.5"/>
-                <circle cx="50" cy="73" r="4" fill="#ffffff"/>
-                <circle cx="50" cy="27" r="4" fill="#000000"/>
-                <line x1="50" y1="4" x2="50" y2="96" stroke="#000000" stroke-width="2"/>
-            </svg>
-        </button>
+
+        <canvas id="wheel" width="500" height="500"></canvas>
+
+        <div class="logo-center">
+            <img src="logo-removebg-preview.png" alt="Sappari">
+        </div>
+
     </div>
 
-    <div class="result-box" id="result">Presiona el centro para iniciar</div>
+    <button id="spinBtn">
+        🎯 GIRAR RULETA
+    </button>
 
-    <script>
-        const canvas = document.getElementById('wheel');
-        const ctx = canvas.getContext('2d');
-        const spinBtn = document.getElementById('spinBtn');
-        const resultBox = document.getElementById('result');
+</div>
 
-        const prizes = [
-            "2x1 en bebidas", 
-            "Sigue participando", 
-            "8 Unid. rollitos", 
-            "Sigue participando", 
-            "20% Desc. Infantil", 
-            "Sigue participando", 
-            "2x1 en Sopas", 
-            "Sigue participando"
-        ];
-        
-        // Colores de alta gama: segmentos negros, rojos y grises oscuros intercalados
-        const colors = ["#111111", "#222222", "#E50914", "#222222", "#111111", "#222222", "#7f0000", "#222222"];
-        const numSegments = prizes.length;
-        const anglePerSegment = (2 * Math.PI) / numSegments;
-        
-        let currentAngle = 0;
-        let isSpinning = false;
+<div class="modal" id="winnerModal">
+    <div class="modal-content">
+        <h2>🎉 ¡FELICIDADES! 🎉</h2>
 
-        function drawWheel() {
-            ctx.clearRect(0, 0, 340, 340);
-            
-            // Dibujar los segmentos de la ruleta
-            for (let i = 0; i < numSegments; i++) {
-                const startAngle = currentAngle + (i * anglePerSegment);
-                const endAngle = startAngle + anglePerSegment;
-                
-                ctx.beginPath();
-                ctx.moveTo(170, 170);
-                ctx.arc(170, 170, 162, startAngle, endAngle);
-                ctx.fillStyle = colors[i];
-                ctx.fill();
-                
-                // Bordes de los gajos de neón sutil
-                ctx.strokeStyle = "rgba(255,255,255,0.1)";
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                
-                // Dibujar los textos de los premios
-                ctx.save();
-                ctx.translate(170, 170);
-                ctx.rotate(startAngle + anglePerSegment / 2);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 10px sans-serif";
-                ctx.textAlign = "right";
-                ctx.
+        <div id="prizeText"></div>
+
+        <button onclick="closeModal()">
+            Cerrar
+        </button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
