@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SAPPARI RESTAURANTE - Ruleta</title>
     <link rel="stylesheet" href="ruleta.css">
+    <link rel="stylesheet" href="ruleta-movil.css">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+JP:wght@400;600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -15,15 +16,16 @@
             <img src="logo-sappari.png" class="logo-top" alt="Sappari Restaurante">
             <p class="eyebrow">Experiencia Japonesa</p>
             <h1>SAPPARI RESTAURANTE</h1>
-            <p class="subtitle">Gira la ruleta y descubre tu premio del dia</p>
+            <p class="subtitle">Gira la ruleta y descubre tu premio por tu visita</p>
         </header>
 
         <div id="formContainer" class="form-container card">
-            <h2>Participa hoy</h2>
-            <p class="form-note">Solo una participacion por persona al dia</p>
+            <h2>Participa ahora</h2>
+            <p class="form-note">Solo una participacion por persona por visita</p>
 
             <input type="text" id="nombre" placeholder="Nombre completo" autocomplete="name">
-            <input type="tel" id="telefono" placeholder="09XXXXXXXX" autocomplete="tel">
+            <input type="tel" id="telefono" placeholder="09XXXXXXXX" autocomplete="tel" inputmode="numeric">
+            <input type="text" id="factura" placeholder="Número de factura" inputmode="numeric">
 
             <p id="errorMessage" class="error-message" hidden></p>
 
@@ -45,6 +47,7 @@
             </div>
 
             <button id="spinBtn" type="button">Girar ruleta</button>
+            <p id="ruletaError" class="error-message ruleta-error" hidden></p>
         </div>
     </div>
 
@@ -55,6 +58,19 @@
             <p class="modal-eyebrow">Premio desbloqueado</p>
             <h2 id="modalTitle">¡Felicidades!</h2>
             <div id="prizeText"></div>
+            <div class="claim-box">
+                <p class="claim-label">Nombre</p>
+                <p id="winnerName" class="claim-value"></p>
+                <p class="claim-label">Teléfono</p>
+                <p id="winnerPhone" class="claim-value"></p>
+                <p class="claim-label">Número de factura</p>
+                <p id="invoiceNumber" class="claim-code"></p>
+                <p class="claim-label">Fecha de compra</p>
+                <p id="purchaseDate" class="claim-date"></p>
+            </div>
+            <p class="claim-instructions">
+                Toma una captura de pantalla y preséntala con tu factura para reclamar tu premio.
+            </p>
             <button type="button" onclick="closeModal()">Cerrar</button>
         </div>
     </div>
