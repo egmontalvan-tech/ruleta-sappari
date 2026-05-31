@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,42 +7,82 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
 <div class="container">
 
-    <h1>🍣 SAPPARI MANTA</h1>
+    <img src="logo-removebg-preview.png" class="logo-top" alt="Sappari">
+
+    <h1>SAPPARI MANTA</h1>
 
     <p class="subtitle">
-        Gira la ruleta y gana increíbles premios
+        Participa y gana premios exclusivos
     </p>
 
-    <div class="wheel-container">
+    <!-- FORMULARIO -->
+    <div id="formContainer" class="form-container">
 
-        <div class="pointer"></div>
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Nombre completo"
+        >
 
-        <canvas id="wheel" width="500" height="500"></canvas>
+        <input
+            type="tel"
+            id="telefono"
+            placeholder="09XXXXXXXX"
+        >
 
-        <div class="logo-center">
-            <img src="logo-removebg-preview.png" alt="Sappari">
-        </div>
+        <button id="validarBtn">
+            VALIDAR PARTICIPACIÓN
+        </button>
 
     </div>
 
-    <button id="spinBtn">
-        🎯 GIRAR RULETA
-    </button>
+    <!-- RULETA -->
+    <div id="ruletaContainer" style="display:none;">
+
+        <div class="wheel-container">
+
+            <div class="pointer"></div>
+
+            <canvas
+                id="wheel"
+                width="500"
+                height="500">
+            </canvas>
+
+            <div class="logo-center">
+                <img
+                    src="logo-removebg-preview.png"
+                    alt="logo">
+            </div>
+
+        </div>
+
+        <button id="spinBtn">
+            🎯 GIRAR RULETA
+        </button>
+
+    </div>
 
 </div>
 
-<div class="modal" id="winnerModal">
+<!-- MODAL PREMIO -->
+
+<div
+    class="modal"
+    id="winnerModal">
 
     <div class="modal-content">
 
-        <img src="logo-removebg-preview.png" class="modal-logo">
+        <img
+            src="logo-removebg-preview.png"
+            class="modal-logo">
 
         <h2>🎉 ¡FELICIDADES! 🎉</h2>
 
@@ -57,6 +96,10 @@
 
 </div>
 
+<!-- FIREBASE -->
+<script type="module" src="firebase.js"></script>
+
+<!-- RULETA -->
 <script src="script.js"></script>
 
 </body>
