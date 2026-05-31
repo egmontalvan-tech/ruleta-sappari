@@ -1,0 +1,139 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:
+linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.75)),
+url("https://images.unsplash.com/photo-1579871494447-9811cf80d66c");
+background-size:cover;
+background-position:center;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+}
+
+.container{
+text-align:center;
+}
+
+h1{
+font-size:3rem;
+color:#ff4040;
+text-shadow:0 0 20px #ff0000;
+}
+
+.subtitle{
+margin-bottom:30px;
+color:#ddd;
+}
+
+.wheel-container{
+position:relative;
+display:inline-block;
+}
+
+.pointer{
+position:absolute;
+top:-10px;
+left:50%;
+transform:translateX(-50%);
+width:0;
+height:0;
+border-left:20px solid transparent;
+border-right:20px solid transparent;
+border-top:40px solid #ffd700;
+z-index:20;
+}
+
+#wheel{
+border-radius:50%;
+border:10px solid #d4af37;
+box-shadow:
+0 0 30px #d4af37,
+0 0 60px rgba(255,215,0,.5);
+background:white;
+}
+
+.logo-center{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:120px;
+height:120px;
+background:white;
+border-radius:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+border:5px solid #d4af37;
+z-index:10;
+}
+
+.logo-center img{
+width:90px;
+}
+
+#spinBtn{
+margin-top:30px;
+padding:15px 40px;
+font-size:20px;
+font-weight:bold;
+background:#ff4040;
+color:white;
+border:none;
+border-radius:50px;
+cursor:pointer;
+transition:.3s;
+}
+
+#spinBtn:hover{
+transform:scale(1.05);
+background:#ff0000;
+}
+
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.8);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+color:black;
+padding:40px;
+border-radius:20px;
+text-align:center;
+animation:pop .4s ease;
+max-width:400px;
+}
+
+#prizeText{
+font-size:28px;
+font-weight:bold;
+margin:20px 0;
+color:#e60023;
+}
+
+@keyframes pop{
+from{
+transform:scale(.5);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
