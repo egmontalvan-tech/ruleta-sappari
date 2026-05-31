@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const prizes = [
     "2x1 en bebidas",
     "Sigue participando",
-    "8 Unid. Rollitos",
+    "8 Rollitos",
     "Sigue participando",
     "20% Desc. Infantil",
     "Sigue participando",
@@ -13,25 +13,26 @@ const prizes = [
 ];
 
 const colors = [
-    "#ff4040",
-    "#111",
-    "#ff4040",
-    "#111",
-    "#ff4040",
-    "#111",
-    "#ff4040",
-    "#111"
+    "#8B0000",
+    "#000000",
+    "#8B0000",
+    "#000000",
+    "#8B0000",
+    "#000000",
+    "#8B0000",
+    "#000000"
 ];
 
 const arc = (2 * Math.PI) / prizes.length;
 
-function drawWheel() {
+function drawWheel(){
 
     for(let i=0;i<prizes.length;i++){
 
         const angle = i * arc;
 
         ctx.beginPath();
+
         ctx.fillStyle = colors[i];
 
         ctx.moveTo(250,250);
@@ -49,10 +50,13 @@ function drawWheel() {
         ctx.save();
 
         ctx.translate(250,250);
+
         ctx.rotate(angle + arc/2);
 
         ctx.fillStyle="white";
+
         ctx.font="bold 18px Poppins";
+
         ctx.textAlign="right";
 
         ctx.fillText(
@@ -67,57 +71,68 @@ function drawWheel() {
 
 drawWheel();
 
-let spinning = false;
-let currentRotation = 0;
-
 document
 .getElementById("spinBtn")
 .addEventListener("click", spinWheel);
 
 function spinWheel(){
 
-    if(spinning) return;
+    const today = new Date().toDateString();
 
-    spinning = true;
+    const lastSpin =
+    localStorage.getItem("sappari_last_spin");
+
+    if(lastSpin === today){
+
+        alert(
+            "🍣 Ya participaste hoy. Regresa mañana."
+        );
+
+        return;
+    }
+
+    localStorage.setItem(
+        "sappari_last_spin",
+        today
+    );
 
     const winnerIndex =
-    Math.floor(Math.random()*prizes.length);
+    Math.floor(
+        Math.random() * prizes.length
+    );
 
-    const anglePerPrize = 360/prizes.length;
+    const anglePerPrize =
+    360 / prizes.length;
 
     const stopAngle =
-    (360*6) +
-    (360 - (winnerIndex*anglePerPrize))
-    - anglePerPrize/2;
-
-    currentRotation = stopAngle;
+    360 * 6 +
+    (360 - winnerIndex * anglePerPrize);
 
     canvas.style.transition =
-    "transform 6s cubic-bezier(0.17,0.67,0.12,0.99)";
+    "transform 6s ease-out";
 
     canvas.style.transform =
     `rotate(${stopAngle}deg)`;
 
     setTimeout(()=>{
 
-        showPrize(prizes[winnerIndex]);
+        document.getElementById(
+            "prizeText"
+        ).innerHTML =
+        prizes[winnerIndex];
 
-        spinning=false;
+        document.getElementById(
+            "winnerModal"
+        ).style.display =
+        "flex";
 
     },6000);
 }
 
-function showPrize(prize){
-
-    document.getElementById("prizeText").innerHTML=
-    `🏆 ${prize}`;
-
-    document.getElementById("winnerModal").style.display=
-    "flex";
-}
-
 function closeModal(){
 
-    document.getElementById("winnerModal").style.display=
+    document.getElementById(
+        "winnerModal"
+    ).style.display =
     "none";
 }
