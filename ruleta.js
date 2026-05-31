@@ -1,5 +1,11 @@
-// Modo prueba: poner en false cuando pidas revertir
-const TEST_MODE = true;
+// Modo prueba solo en local (GitHub Pages usa Firebase y validación real)
+const TEST_MODE =
+    location.protocol === "file:" ||
+    location.hostname === "localhost" ||
+    location.hostname === "127.0.0.1";
+
+const memoryDailyCache = new Map();
+const memorySessionCache = new Set();
 
 const PRIZES = [
     "2x1 en bebidas",
@@ -137,20 +143,76 @@ function sessionSpinKey(phone) {
     return `${STORAGE_PREFIX}spin_${normalizePhone(phone)}`;
 }
 
+function storageGet(storage, key) {
+    try {
+        return storage.getItem(key);
+    } catch (error) {
+        console.warn("No se pudo leer almacenamiento local:", error);
+        return null;
+    }
+}
+
+function storageSet(storage, key, value) {
+    try {
+        storage.setItem(key, value);
+        return true;
+    } catch (error) {
+        console.warn("No se pudo guardar en almacenamiento local:", error);
+        return false;
+    }
+}
+
+function storageRemove(storage, key) {
+    try {
+        storage.removeItem(key);
+    } catch (error) {
+        console.warn("No se pudo borrar del almacenamiento local:", error);
+    }
+}
+
 function hasPlayedTodayCache(phone) {
-    return localStorage.getItem(dailyCacheKey(phone)) === "1";
+    const key = dailyCacheKey(phone);
+
+    if (memoryDailyCache.get(key) === "1") {
+        return true;
+    }
+
+    return storageGet(localStorage, key) === "1";
 }
 
 function markPlayedTodayCache(phone) {
-    localStorage.setItem(dailyCacheKey(phone), "1");
+    const key = dailyCacheKey(phone);
+    memoryDailyCache.set(key, "1");
+    storageSet(localStorage, key, "1");
 }
 
 function hasSpunThisSession(phone) {
-    return sessionStorage.getItem(sessionSpinKey(phone)) === "1";
+    const key = sessionSpinKey(phone);
+    const normalized = normalizePhone(phone);
+
+    if (memorySessionCache.has(normalized)) {
+        return true;
+    }
+
+    return storageGet(sessionStorage, key) === "1";
 }
 
 function markSpunThisSession(phone) {
-    sessionStorage.setItem(sessionSpinKey(phone), "1");
+    const key = sessionSpinKey(phone);
+    const normalized = normalizePhone(phone);
+
+    memorySessionCache.add(normalized);
+    storageSet(sessionStorage, key, "1");
+}
+
+function clearParticipationCache(phone) {
+    const dailyKey = dailyCacheKey(phone);
+    const sessionKey = sessionSpinKey(phone);
+
+    memoryDailyCache.delete(dailyKey);
+    memorySessionCache.delete(normalizePhone(phone));
+    storageRemove(localStorage, dailyKey);
+    storageRemove(sessionStorage, sessionKey);
 }
 
 function formatPurchaseDate() {
@@ -547,8 +609,7 @@ function spinWheel() {
                 lockSpinButton("Participación registrada");
             }
         } catch (error) {
-            sessionStorage.removeItem(sessionSpinKey(participantPhone));
-            localStorage.removeItem(dailyCacheKey(participantPhone));
+            clearParticipationCache(participantPhone);
             showRuletaError("No se pudo registrar tu participación. Intenta nuevamente.");
             console.error(error);
             spinBtn.disabled = false;
@@ -569,9 +630,11 @@ window.closeModal = function closeModal() {
 validarBtn.addEventListener("click", async () => {
     clearError();
 
-    const nombre = nombreInput.value.trim() || "Prueba";
-    const telefono = telefonoInput.value.trim() || "0900000000";
+    const nombre = nombreInput.value.trim();
+    const telefono = telefonoInput.value.trim();
     const factura = facturaInput.value.trim();
+    const nombreFinal = TEST_MODE && !nombre ? "Prueba" : nombre;
+    const telefonoFinal = TEST_MODE && !telefono ? "0900000000" : telefono;
 
     validarBtn.disabled = true;
     validarBtn.textContent = "Validando...";
@@ -582,32 +645,37 @@ validarBtn.addEventListener("click", async () => {
             return;
         }
 
-        if (hasPlayedTodayCache(telefono)) {
+        if (hasPlayedTodayCache(telefonoFinal)) {
             showError("Ya participaste hoy. Solo puedes girar una vez al día.");
             return;
         }
 
         if (!TEST_MODE) {
-            if (!isValidName(nombre)) {
+            if (!isValidName(nombreFinal)) {
                 showError("Ingresa un nombre válido.");
                 return;
             }
 
-            if (!isValidPhone(telefono)) {
+            if (!isValidPhone(telefonoFinal)) {
                 showError("Ingresa un celular ecuatoriano válido (09XXXXXXXX).");
                 return;
             }
 
             await initFirebase();
 
-            if (await hasPlayedToday(telefono)) {
+            if (!db) {
+                showError("No se pudo conectar con la base de datos.");
+                return;
+            }
+
+            if (await hasPlayedToday(telefonoFinal)) {
                 showError("Ya participaste hoy. No puedes reclamar dos veces el mismo día.");
                 return;
             }
         }
 
-        participantName = nombre;
-        participantPhone = telefono;
+        participantName = nombreFinal;
+        participantPhone = telefonoFinal;
         participantInvoice = factura;
         showRuleta();
     } catch (error) {
