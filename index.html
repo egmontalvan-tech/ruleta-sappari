@@ -7,10 +7,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), url('https://images.unsplash.com/photo-1611143669185-af224c5e3252?q=80&w=1000&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background-color: #0a0a0a;
             color: #fff;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
@@ -27,9 +24,9 @@
             font-size: 28px; 
             text-transform: uppercase; 
             letter-spacing: 3px;
-            text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
+            text-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
         }
-        p { color: #aaa; margin-bottom: 30px; font-size: 14px; text-align: center; max-width: 300px; }
+        p { color: #888; margin-bottom: 30px; font-size: 14px; text-align: center; max-width: 300px; }
         
         .wheel-container { 
             position: relative; 
@@ -38,58 +35,147 @@
             margin-bottom: 35px;
         }
         
-        /* Efecto futurista y marco exterior de la ruleta */
         canvas { 
             width: 100%; 
             height: 100%; 
             border-radius: 50%; 
-            box-shadow: 0 0 30px rgba(229, 9, 20, 0.5), inset 0 0 20px rgba(0,0,0,0.8); 
-            border: 6px solid #1f1f1f; 
-            background: #000;
+            box-shadow: 0 0 35px rgba(229, 9, 20, 0.4); 
+            border: 8px solid #1a1a1a; 
+            background: #111;
         }
         
-        /* Indicador superior sobrio */
         .pointer {
             position: absolute;
-            top: -12px;
+            top: -15px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
             border-left: 14px solid transparent;
             border-right: 14px solid transparent;
-            border-top: 26px solid #E50914;
-            z-index: 10;
+            border-top: 28px solid #E50914;
+            z-index: 15;
             filter: drop-shadow(0 2px 5px rgba(229, 9, 20, 0.5));
         }
         
-        /* Botón central interactivo con el logo de SAPPARI */
+        /* Botón central interactivo con el logo vectorial de SAPPARI incorporado */
         .spin-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
-            background-color: #fff;
-            background-image: url('https://i.ibb.co/68Z4wZp/logo-removebg-preview.png');
-            background-size: 85% 85%;
-            background-repeat: no-repeat;
-            background-position: center;
+            width: 85px;
+            height: 85px;
+            background-color: #ffffff;
             border: 4px solid #E50914;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(229, 9, 20, 0.7), inset 0 0 8px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.7);
             z-index: 12;
-            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
         }
         .spin-btn:active {
             transform: translate(-50%, -50%) scale(0.92);
-            box-shadow: 0 0 25px rgba(229, 9, 20, 0.9);
+        }
+        .spin-btn svg {
+            width: 90%;
+            height: 90%;
         }
         
-        /* Caja de Resultados con diseño de interfaz transparente de alta tecnología */
         .result-box {
             font-size: 15px;
             font-weight: 600;
-            color: #4CD9
+            color: #4CD964;
+            text-align: center;
+            min-height: 55px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SAPPARI</h1>
+    <p>Toca el logo central para girar la ruleta y descubrir tu beneficio de hoy.</p>
+
+    <div class="wheel-container">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="340" height="340"></canvas>
+        <button class="spin-btn" id="spinBtn">
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="46" fill="none" stroke="#000000" stroke-width="3"/>
+                <path d="M 50 4 A 46 46 0 0 0 50 96 A 23 23 0 0 1 50 50 A 23 23 0 0 0 50 4" fill="#E50914"/>
+                <path d="M 50 4 A 46 46 0 0 1 50 96 A 23 23 0 0 1 50 50 A 23 23 0 0 0 50 4" fill="#000000"/>
+                <path d="M 50 50 A 23 23 0 0 0 50 96" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+                <circle cx="50" cy="73" r="4" fill="#ffffff"/>
+                <circle cx="50" cy="27" r="4" fill="#000000"/>
+                <line x1="50" y1="4" x2="50" y2="96" stroke="#000000" stroke-width="2"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="result-box" id="result">Presiona el centro para iniciar</div>
+
+    <script>
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultBox = document.getElementById('result');
+
+        const prizes = [
+            "2x1 en bebidas", 
+            "Sigue participando", 
+            "8 Unid. rollitos", 
+            "Sigue participando", 
+            "20% Desc. Infantil", 
+            "Sigue participando", 
+            "2x1 en Sopas", 
+            "Sigue participando"
+        ];
+        
+        // Colores de alta gama: segmentos negros, rojos y grises oscuros intercalados
+        const colors = ["#111111", "#222222", "#E50914", "#222222", "#111111", "#222222", "#7f0000", "#222222"];
+        const numSegments = prizes.length;
+        const anglePerSegment = (2 * Math.PI) / numSegments;
+        
+        let currentAngle = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, 340, 340);
+            
+            // Dibujar los segmentos de la ruleta
+            for (let i = 0; i < numSegments; i++) {
+                const startAngle = currentAngle + (i * anglePerSegment);
+                const endAngle = startAngle + anglePerSegment;
+                
+                ctx.beginPath();
+                ctx.moveTo(170, 170);
+                ctx.arc(170, 170, 162, startAngle, endAngle);
+                ctx.fillStyle = colors[i];
+                ctx.fill();
+                
+                // Bordes de los gajos de neón sutil
+                ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // Dibujar los textos de los premios
+                ctx.save();
+                ctx.translate(170, 170);
+                ctx.rotate(startAngle + anglePerSegment / 2);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 10px sans-serif";
+                ctx.textAlign = "right";
+                ctx.
