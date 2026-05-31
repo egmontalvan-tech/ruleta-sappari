@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAPPARI - Ruleta de la Fortuna</title>
+    <style>
+        /* --- CONFIGURACIÓN GENERAL Y PALETA (Negro, Rojo, Madera) --- */
+        :root {
+            --bg-dark: #0d0d0d;
+            --sushi-red: #e62429;
+            --wood-dark: #2b1810;
+            --wood-light: #4a2c1b;
+            --text-light: #ffffff;
+            --gold: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle, #1a1a1a 0%, #050505 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- BRANDING --- */
+        .brand {
+            margin-bottom: 25px;
+        }
+
+        .brand h1 {
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .brand h1 span {
+            color: var(--sushi-red);
+        }
+
+        .brand p {
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- CONTENEDOR DE LA RULETA (RESPONSIVO) --- */
+        .wheel-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+            /* Borde exterior estilo madera noble */
+            background: linear-gradient(135deg, var(--wood-light), var(--wood-dark));
+            border-radius: 50%;
+            padding: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), 
+                        inset 0 2px 5px rgba(255,255,255,0.2);
+        }
+
+        /* Indicador / Flecha superior */
+        .pointer {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 30px solid var(--sushi-red);
+            z-index: 10;
+            filter: drop-shadow(0 4px 5px rgba(0,0,0,0.5));
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: block;
+            background-color: #111;
+        }
+
+        /* --- BOTÓN CENTRAL --- */
+        .spin-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, var(--sushi-red) 60%, #b31217 100%);
+            border: 4px solid #111;
+            border-radius: 50%;
+            color: var(--text-light);
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            cursor: pointer
