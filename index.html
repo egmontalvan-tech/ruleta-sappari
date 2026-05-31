@@ -3,9 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script>
+        (function () {
+            var path = location.pathname;
+            if (!path.endsWith("/")) {
+                path = /\.html?$/i.test(path)
+                    ? path.replace(/[^/]+$/, "")
+                    : path + "/";
+            }
+            var base = document.createElement("base");
+            base.href = path;
+            document.head.appendChild(base);
+        })();
+    </script>
     <title>SAPPARI RESTAURANTE - Ruleta</title>
-    <link rel="stylesheet" href="ruleta.css">
-    <link rel="stylesheet" href="ruleta-movil.css">
+    <link rel="stylesheet" href="./ruleta.css">
+    <link rel="stylesheet" href="./ruleta-movil.css">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+JP:wght@400;600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -13,7 +26,7 @@
 
     <div class="container">
         <header class="hero">
-            <img src="logo-sappari.png" class="logo-top" alt="Sappari Restaurante">
+            <img src="./logo-sappari.png" class="logo-top" alt="Sappari Restaurante">
             <p class="eyebrow">Experiencia Japonesa</p>
             <h1>SAPPARI RESTAURANTE</h1>
             <p class="subtitle">Gira la ruleta y descubre tu premio por tu visita</p>
@@ -42,7 +55,7 @@
                 <canvas id="wheel" width="480" height="480"></canvas>
                 <div class="logo-center">
                     <div class="logo-center-ring"></div>
-                    <img src="logo-sappari.png" alt="Logo Sappari">
+                    <img src="./logo-sappari.png" alt="Logo Sappari">
                 </div>
             </div>
 
@@ -54,7 +67,7 @@
     <div class="modal" id="winnerModal">
         <div class="modal-content card modal-celebration">
             <div class="modal-sparkles" aria-hidden="true"></div>
-            <img src="logo-sappari.png" class="modal-logo" alt="Logo Sappari">
+            <img src="./logo-sappari.png" class="modal-logo" alt="Logo Sappari">
             <p class="modal-eyebrow">Premio desbloqueado</p>
             <h2 id="modalTitle">¡Felicidades!</h2>
             <div id="prizeText"></div>
@@ -78,6 +91,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore-compat.js"></script>
-    <script src="ruleta.js"></script>
+    <script src="./ruleta.js"></script>
 </body>
 </html>
