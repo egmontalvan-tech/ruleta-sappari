@@ -3,13 +3,13 @@ const TEST_MODE = true;
 
 const PRIZES = [
     "2x1 en bebidas",
-    "Sigue participando!",
-    "8 Unid. Rollitos",
-    "Sigue participando!",
+    "Sigue participando",
+    "4 Unid. Rollitos",
+    "Sigue participando",
     "20% Desc. Infantil",
-    "Sigue participando!",
+    "Sigue participando",
     "2x1 en Sopas",
-    "Sigue participando!"
+    "Sigue participando"
 ];
 
 const REAL_PRIZE_INDICES = [0, 2, 4, 6];
@@ -29,20 +29,49 @@ const CONSOLATION_SEGMENT_STYLE = {
 
 let participantName = "";
 let participantPhone = "";
+let participantInvoice = "";
 let currentRotation = 0;
 let isSpinning = false;
 let db = null;
+let wheelLogicalSize = 480;
 
 const formContainer = document.getElementById("formContainer");
 const ruletaContainer = document.getElementById("ruletaContainer");
 const nombreInput = document.getElementById("nombre");
 const telefonoInput = document.getElementById("telefono");
+const facturaInput = document.getElementById("factura");
 const validarBtn = document.getElementById("validarBtn");
 const spinBtn = document.getElementById("spinBtn");
 const wheelCanvas = document.getElementById("wheel");
 const winnerModal = document.getElementById("winnerModal");
 const prizeText = document.getElementById("prizeText");
+const winnerNameEl = document.getElementById("winnerName");
+const winnerPhoneEl = document.getElementById("winnerPhone");
+const invoiceNumberEl = document.getElementById("invoiceNumber");
+const purchaseDateEl = document.getElementById("purchaseDate");
+const STORAGE_PREFIX = "sappari_";
+
 const errorMessage = document.getElementById("errorMessage");
+const ruletaError = document.getElementById("ruletaError");
+
+const mobileQuery = window.matchMedia("(max-width: 768px)");
+
+function applyDeviceLayout() {
+    const isMobile = mobileQuery.matches;
+
+    document.documentElement.classList.toggle("layout-movil", isMobile);
+    document.body.classList.toggle("layout-movil", isMobile);
+}
+
+applyDeviceLayout();
+
+mobileQuery.addEventListener("change", () => {
+    applyDeviceLayout();
+
+    if (!ruletaContainer.hidden) {
+        resizeWheelCanvas();
+    }
+});
 
 function getTodayKey() {
     return new Date().toISOString().slice(0, 10);
@@ -60,6 +89,10 @@ function isValidPhone(phone) {
     return /^09\d{8}$/.test(normalizePhone(phone));
 }
 
+function isValidInvoice(invoice) {
+    return invoice.trim().length >= 3;
+}
+
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.hidden = false;
@@ -68,10 +101,65 @@ function showError(message) {
 function clearError() {
     errorMessage.textContent = "";
     errorMessage.hidden = true;
+    ruletaError.textContent = "";
+    ruletaError.hidden = true;
+}
+
+function showRuletaError(message) {
+    ruletaError.textContent = message;
+    ruletaError.hidden = false;
+}
+
+function lockSpinButton(message) {
+    spinBtn.disabled = true;
+    spinBtn.textContent = message;
+}
+
+function updateSpinAvailability() {
+    if (!participantPhone) {
+        return;
+    }
+
+    if (hasSpunThisSession(participantPhone) || hasPlayedTodayCache(participantPhone)) {
+        lockSpinButton("Participación registrada");
+    }
 }
 
 function participationDocId(phone) {
     return `${normalizePhone(phone)}_${getTodayKey()}`;
+}
+
+function dailyCacheKey(phone) {
+    return `${STORAGE_PREFIX}daily_${participationDocId(phone)}`;
+}
+
+function sessionSpinKey(phone) {
+    return `${STORAGE_PREFIX}spin_${normalizePhone(phone)}`;
+}
+
+function hasPlayedTodayCache(phone) {
+    return localStorage.getItem(dailyCacheKey(phone)) === "1";
+}
+
+function markPlayedTodayCache(phone) {
+    localStorage.setItem(dailyCacheKey(phone), "1");
+}
+
+function hasSpunThisSession(phone) {
+    return sessionStorage.getItem(sessionSpinKey(phone)) === "1";
+}
+
+function markSpunThisSession(phone) {
+    sessionStorage.setItem(sessionSpinKey(phone), "1");
+}
+
+function formatPurchaseDate() {
+    return new Date().toLocaleDateString("es-EC", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
 }
 
 async function initFirebase() {
@@ -98,15 +186,22 @@ async function hasPlayedToday(phone) {
     return snapshot.exists;
 }
 
-async function saveParticipation(prize) {
-    const ref = db.collection("participaciones").doc(participationDocId(participantPhone));
-    await ref.set({
+async function saveParticipation(prize, isWinner = false) {
+    const data = {
         nombre: participantName.trim(),
         telefono: normalizePhone(participantPhone),
+        numeroFactura: participantInvoice,
         fecha: getTodayKey(),
         premio: prize,
         registradoEn: new Date().toISOString()
-    });
+    };
+
+    if (isWinner) {
+        data.fechaCompra = formatPurchaseDate();
+    }
+
+    const ref = db.collection("participaciones").doc(participationDocId(participantPhone));
+    await ref.set(data);
 }
 
 function randomInt(max) {
@@ -203,14 +298,54 @@ function launchCelebration() {
 
 function showWinnerCelebration(prize) {
     prizeText.textContent = prize;
+    winnerNameEl.textContent = participantName;
+    winnerPhoneEl.textContent = participantPhone;
+    invoiceNumberEl.textContent = participantInvoice;
+    purchaseDateEl.textContent = formatPurchaseDate();
     winnerModal.style.display = "flex";
     launchCelebration();
+}
+
+function getTargetWheelSize() {
+    const container = document.querySelector(".wheel-container");
+
+    if (!container) {
+        return 480;
+    }
+
+    const width = container.clientWidth || 480;
+    const isMobile = document.documentElement.classList.contains("layout-movil");
+    const maxSize = isMobile
+        ? Math.min(width, window.innerWidth - 24, 380)
+        : Math.min(width, 480);
+
+    return Math.max(260, Math.floor(maxSize));
+}
+
+function resizeWheelCanvas() {
+    if (!wheelCanvas) {
+        return;
+    }
+
+    const size = getTargetWheelSize();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    wheelLogicalSize = size;
+    wheelCanvas.width = Math.floor(size * dpr);
+    wheelCanvas.height = Math.floor(size * dpr);
+    wheelCanvas.style.width = `${size}px`;
+    wheelCanvas.style.height = `${size}px`;
+
+    const ctx = wheelCanvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawWheel();
 }
 
 function showRuleta() {
     formContainer.hidden = true;
     ruletaContainer.hidden = false;
-    drawWheel();
+    updateSpinAvailability();
+    requestAnimationFrame(resizeWheelCanvas);
 }
 
 function wrapText(ctx, text, maxWidth) {
@@ -273,12 +408,15 @@ function drawSegmentLabel(ctx, center, innerRadius, outerRadius, startAngle, end
 
 function drawWheel() {
     const ctx = wheelCanvas.getContext("2d");
-    const size = wheelCanvas.width;
+    const size = wheelLogicalSize;
+    const scale = size / 480;
     const center = size / 2;
-    const radius = center - 14;
-    const hubRadius = 58;
-    const labelInnerRadius = hubRadius + 12;
-    const labelOuterRadius = radius - 16;
+    const radius = center - 14 * scale;
+    const hubRadius = 58 * scale;
+    const labelInnerRadius = hubRadius + 12 * scale;
+    const labelOuterRadius = radius - 16 * scale;
+    const prizeFontSize = Math.max(9, Math.round(12 * scale));
+    const consolationFontSize = Math.max(8, Math.round(11 * scale));
 
     ctx.clearRect(0, 0, size, size);
 
@@ -321,7 +459,7 @@ function drawWheel() {
             endAngle,
             PRIZES[i],
             style.text,
-            isRealPrize(i) ? 12 : 11
+            isRealPrize(i) ? prizeFontSize : consolationFontSize
         );
     }
 
@@ -354,6 +492,18 @@ function spinWheel() {
         return;
     }
 
+    if (hasSpunThisSession(participantPhone)) {
+        showRuletaError("Ya giraste la ruleta en esta sesión.");
+        lockSpinButton("Participación registrada");
+        return;
+    }
+
+    if (hasPlayedTodayCache(participantPhone)) {
+        showRuletaError("Ya participaste hoy. Solo puedes girar una vez al día.");
+        lockSpinButton("Participación registrada");
+        return;
+    }
+
     isSpinning = true;
     spinBtn.disabled = true;
     spinBtn.textContent = "Girando...";
@@ -380,17 +530,26 @@ function spinWheel() {
         const prize = PRIZES[landedIndex];
 
         try {
-            if (!TEST_MODE) {
-                await saveParticipation(prize);
-            }
+            markSpunThisSession(participantPhone);
+            markPlayedTodayCache(participantPhone);
 
             if (isRealPrize(landedIndex)) {
+                if (!TEST_MODE) {
+                    await saveParticipation(prize, true);
+                }
+
                 showWinnerCelebration(prize);
             } else {
-                spinBtn.textContent = "Participación registrada";
+                if (!TEST_MODE) {
+                    await saveParticipation(prize);
+                }
+
+                lockSpinButton("Participación registrada");
             }
         } catch (error) {
-            showError("No se pudo registrar tu participación. Intenta nuevamente.");
+            sessionStorage.removeItem(sessionSpinKey(participantPhone));
+            localStorage.removeItem(dailyCacheKey(participantPhone));
+            showRuletaError("No se pudo registrar tu participación. Intenta nuevamente.");
             console.error(error);
             spinBtn.disabled = false;
             spinBtn.textContent = "Girar ruleta";
@@ -404,8 +563,7 @@ function spinWheel() {
 
 window.closeModal = function closeModal() {
     winnerModal.style.display = "none";
-    spinBtn.disabled = true;
-    spinBtn.textContent = "Participación registrada";
+    lockSpinButton("Participación registrada");
 };
 
 validarBtn.addEventListener("click", async () => {
@@ -413,40 +571,44 @@ validarBtn.addEventListener("click", async () => {
 
     const nombre = nombreInput.value.trim() || "Prueba";
     const telefono = telefonoInput.value.trim() || "0900000000";
-
-    if (!TEST_MODE) {
-        if (!isValidName(nombre)) {
-            showError("Ingresa un nombre válido.");
-            return;
-        }
-
-        if (!isValidPhone(telefono)) {
-            showError("Ingresa un celular ecuatoriano válido (09XXXXXXXX).");
-            return;
-        }
-    }
+    const factura = facturaInput.value.trim();
 
     validarBtn.disabled = true;
     validarBtn.textContent = "Validando...";
 
     try {
-        if (TEST_MODE) {
-            participantName = nombre;
-            participantPhone = telefono;
-            showRuleta();
+        if (!isValidInvoice(factura)) {
+            showError("Ingresa un número de factura válido.");
             return;
         }
 
-        await initFirebase();
-        const alreadyPlayed = await hasPlayedToday(telefono);
-
-        if (alreadyPlayed) {
-            showError("Esta persona ya participó hoy. Vuelve mañana.");
+        if (hasPlayedTodayCache(telefono)) {
+            showError("Ya participaste hoy. Solo puedes girar una vez al día.");
             return;
+        }
+
+        if (!TEST_MODE) {
+            if (!isValidName(nombre)) {
+                showError("Ingresa un nombre válido.");
+                return;
+            }
+
+            if (!isValidPhone(telefono)) {
+                showError("Ingresa un celular ecuatoriano válido (09XXXXXXXX).");
+                return;
+            }
+
+            await initFirebase();
+
+            if (await hasPlayedToday(telefono)) {
+                showError("Ya participaste hoy. No puedes reclamar dos veces el mismo día.");
+                return;
+            }
         }
 
         participantName = nombre;
         participantPhone = telefono;
+        participantInvoice = factura;
         showRuleta();
     } catch (error) {
         showError("Error al validar participación. Revisa tu conexión.");
@@ -458,3 +620,17 @@ validarBtn.addEventListener("click", async () => {
 });
 
 spinBtn.addEventListener("click", spinWheel);
+
+window.addEventListener("resize", () => {
+    if (!ruletaContainer.hidden) {
+        resizeWheelCanvas();
+    }
+});
+
+window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+        if (!ruletaContainer.hidden) {
+            resizeWheelCanvas();
+        }
+    }, 200);
+});
