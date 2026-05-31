@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAPPARI MANTA - RULETA</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <img src="logo-removebg-preview.png" class="logo-top" alt="Sappari">
+
+    <h1>SAPPARI MANTA</h1>
+
+    <p class="subtitle">
+        Participa y gana premios exclusivos
+    </p>
+
+    <!-- FORMULARIO -->
+    <div id="formContainer" class="form-container">
+
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Nombre completo"
+        >
+
+        <input
+            type="tel"
+            id="telefono"
+            placeholder="09XXXXXXXX"
+        >
+
+        <button id="validarBtn">
+            VALIDAR PARTICIPACIÓN
+        </button>
+
+    </div>
+
+    <!-- RULETA -->
+    <div id="ruletaContainer" style="display:none;">
+
+        <div class="wheel-container">
+
+            <div class="pointer"></div>
+
+            <canvas
+                id="wheel"
+                width="500"
+                height="500">
+            </canvas>
+
+            <div class="logo-center">
+                <img
+                    src="logo-removebg-preview.png"
+                    alt="logo">
+            </div>
+
+        </div>
+
+        <button id="spinBtn">
+            🎯 GIRAR RULETA
+        </button>
+
+    </div>
+
+</div>
+
+<!-- MODAL PREMIO -->
+
+<div
+    class="modal"
+    id="winnerModal">
+
+    <div class="modal-content">
+
+        <img
+            src="logo-removebg-preview.png"
+            class="modal-logo">
+
+        <h2>🎉 ¡FELICIDADES! 🎉</h2>
+
+        <div id="prizeText"></div>
+
+        <button onclick="closeModal()">
+            Cerrar
+        </button>
+
+    </div>
+
+</div>
+
+<!-- FIREBASE -->
+<script type="module" src="firebase.js"></script>
+
+<!-- RULETA -->
+<script src="script.js"></script>
+
+</body>
+</html>
