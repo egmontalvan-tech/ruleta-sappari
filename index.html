@@ -18,9 +18,9 @@
             padding: 20px;
         }
         h1 { color: #E50914; margin-bottom: 5px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #ccc; margin-bottom: 25px; font-size: 14px; text-align: center; }
-        .wheel-container { position: relative; width: 320px; height: 320px; margin-bottom: 30px; }
-        canvas { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 20px rgba(229, 9, 20, 0.4); border: 8px solid #222; }
+        p { color: #ccc; margin-bottom: 25px; font-size: 14px; text-align: center; max-width: 300px; }
+        .wheel-container { position: relative; width: 330px; height: 330px; margin-bottom: 30px; }
+        canvas { width: 100%; height: 100%; border-radius: 50%; box-shadow: 0 0 25px rgba(229, 9, 20, 0.4); border: 8px solid #222; }
         .pointer {
             position: absolute;
             top: -15px;
@@ -38,14 +38,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             background-color: #E50914;
             border: 4px solid #222;
             border-radius: 50%;
             color: white;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             display: flex;
@@ -54,27 +54,30 @@
             text-transform: uppercase;
         }
         .result-box {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #4CD964;
             text-align: center;
-            min-height: 30px;
-            padding: 10px;
+            min-height: 50px;
+            padding: 12px;
             background: rgba(255,255,255,0.05);
             border-radius: 8px;
             width: 100%;
-            max-width: 300px;
+            max-width: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
 
     <h1>SAPPARI</h1>
-    <p>¡Gira la ruleta y descubre tu premio sorpresa de hoy!</p>
+    <p>¡Gira la ruleta y descubre tu sorpresa especial de hoy!</p>
 
     <div class="wheel-container">
         <div class="pointer"></div>
-        <canvas id="wheel" width="320" height="320"></canvas>
+        <canvas id="wheel" width="330" height="330"></canvas>
         <button class="spin-btn" id="spinBtn">Girar</button>
     </div>
 
@@ -86,87 +89,13 @@
         const spinBtn = document.getElementById('spinBtn');
         const resultBox = document.getElementById('result');
 
-        // Premios basados en la estructura de costos de Sappari
+        // Tus 8 opciones configuradas de forma alterna
         const prizes = [
-            "Bebida Gratis", 
-            "10% Desc. Combo", 
-            "Porción Tempura", 
-            "Postre Sorpresa", 
-            "Bebida Gratis", 
-            "10% Desc. Combo"
-        ];
-        
-        const colors = ["#1a1a1a", "#E50914", "#2a2a2a", "#990000", "#1a1a1a", "#E50914"];
-        const numSegments = prizes.length;
-        const anglePerSegment = (2 * Math.PI) / numSegments;
-        
-        let currentAngle = 0;
-        let isSpinning = false;
-
-        function drawWheel() {
-            for (let i = 0; i < numSegments; i++) {
-                const startAngle = currentAngle + (i * anglePerSegment);
-                const endAngle = startAngle + anglePerSegment;
-                
-                ctx.beginPath();
-                ctx.moveTo(160, 160);
-                ctx.arc(160, 160, 160, startAngle, endAngle);
-                ctx.fillStyle = colors[i];
-                ctx.fill();
-                ctx.stroke();
-                
-                ctx.save();
-                ctx.translate(160, 160);
-                ctx.rotate(startAngle + anglePerSegment / 2);
-                ctx.fillStyle = "#fff";
-                ctx.font = "bold 12px sans-serif";
-                ctx.textAlign = "right";
-                ctx.fillText(prizes[i], 140, 5);
-                ctx.restore();
-            }
-        }
-
-        function spin() {
-            if (isSpinning) return;
-            isSpinning = true;
-            resultBox.innerText = "";
-            
-            const spinAngle = Math.random() * 1000 + 1500; 
-            const duration = 3000; 
-            const startTimestamp = performance.now();
-            
-            const initialAngle = currentAngle;
-
-            function animate(now) {
-                const elapsed = now - startTimestamp;
-                const progress = Math.min(elapsed / duration, 1);
-                
-                // Efecto de desaceleración (Ease-out)
-                const easeOut = 1 - Math.pow(1 - progress, 3);
-                currentAngle = initialAngle + (easeOut * (spinAngle * Math.PI / 180));
-                
-                ctx.clearRect(0, 0, 320, 320);
-                drawWheel();
-                
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    isSpinning = false;
-                    
-                    // Calcular premio (apuntando al norte/arriba: -90 grados o 1.5 * Math.PI)
-                    const normalizedAngle = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
-                    const pointerAngle = (normalizedAngle + 3 * Math.PI / 2) % (2 * Math.PI);
-                    const prizeIndex = Math.floor(pointerAngle / anglePerSegment);
-                    
-                    resultBox.innerText = "¡Felicidades! Ganaste: " + prizes[prizeIndex];
-                }
-            }
-            
-            requestAnimationFrame(animate);
-        }
-
-        spinBtn.addEventListener('click', spin);
-        drawWheel();
-    </script>
-</body>
-</html>
+            "2x1 en bebidas", 
+            "Sigue participando", 
+            "8 Unid. rollitos", 
+            "Sigue participando", 
+            "20% Desc. Infantil", 
+            "Sigue participando", 
+            "2x1 en Sopas", 
+            "Sigue participando"
