@@ -688,8 +688,17 @@ validarBtn.addEventListener("click", async () => {
                 return;
             }
 
-            if (await hasPlayedToday(telefonoFinal)) {
-                showError("Ya participaste hoy. No puedes reclamar dos veces el mismo día.");
+            try {
+                if (await hasPlayedToday(telefonoFinal)) {
+                    showError("Ya participaste hoy. No puedes reclamar dos veces el mismo día.");
+                    return;
+                }
+            } catch (error) {
+                const code = error && error.code ? ` (${error.code})` : "";
+                showError(
+                    `No se pudo verificar tu participación${code}. Publica las reglas de firestore.rules en Firebase Console.`
+                );
+                console.error("Firestore hasPlayedToday:", error);
                 return;
             }
         }
