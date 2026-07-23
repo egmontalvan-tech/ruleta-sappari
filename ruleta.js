@@ -241,13 +241,24 @@ function clearParticipationCache(phone) {
     storageRemove(sessionStorage, sessionKey);
 }
 
-function formatPurchaseDate() {
+function formatParticipationDate() {
     return new Date().toLocaleDateString("es-EC", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric"
     });
+}
+
+function buildParticipationRecord(extra = {}) {
+    return {
+        nombre: participantName.trim(),
+        celular: normalizePhone(participantPhone),
+        factura: participantInvoice,
+        fecha: getTodayKey(),
+        fechaLegible: formatParticipationDate(),
+        ...extra
+    };
 }
 
 async function initFirebase() {
@@ -297,32 +308,25 @@ async function hasPlayedToday(phone) {
 }
 
 async function saveRegistration() {
-    const data = {
-        nombre: participantName.trim(),
-        telefono: normalizePhone(participantPhone),
-        numeroFactura: participantInvoice,
-        fecha: getTodayKey(),
+    const data = buildParticipationRecord({
+        premio: "Pendiente de girar",
         estado: "validado",
-        validadoEn: new Date().toISOString()
-    };
+        horaRegistro: new Date().toISOString()
+    });
 
     await participationRef(participantPhone).set(data, { merge: true });
     showDbStatus(`Registro guardado: ${participationDocId(participantPhone)}`);
 }
 
 async function saveParticipation(prize, isWinner = false) {
-    const data = {
-        nombre: participantName.trim(),
-        telefono: normalizePhone(participantPhone),
-        numeroFactura: participantInvoice,
-        fecha: getTodayKey(),
+    const data = buildParticipationRecord({
         premio: prize,
         estado: "completado",
-        giroEn: new Date().toISOString()
-    };
+        horaGiro: new Date().toISOString()
+    });
 
     if (isWinner) {
-        data.fechaCompra = formatPurchaseDate();
+        data.fechaReclamo = formatParticipationDate();
     }
 
     await participationRef(participantPhone).set(data, { merge: true });
@@ -426,7 +430,7 @@ function showWinnerCelebration(prize) {
     winnerNameEl.textContent = participantName;
     winnerPhoneEl.textContent = participantPhone;
     invoiceNumberEl.textContent = participantInvoice;
-    purchaseDateEl.textContent = formatPurchaseDate();
+    purchaseDateEl.textContent = formatParticipationDate();
     winnerModal.style.display = "flex";
     launchCelebration();
 }
