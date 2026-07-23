@@ -61,6 +61,7 @@ const purchaseDateEl = document.getElementById("purchaseDate");
 const STORAGE_PREFIX = "sappari_";
 
 const errorMessage = document.getElementById("errorMessage");
+const dbStatusEl = document.getElementById("dbStatus");
 const ruletaError = document.getElementById("ruletaError");
 
 const mobileQuery = window.matchMedia("(max-width: 768px)");
@@ -100,6 +101,28 @@ function isValidPhone(phone) {
 
 function isValidInvoice(invoice) {
     return invoice.trim().length >= 3;
+}
+
+function showDbStatus(message, isError = false) {
+    if (!dbStatusEl) {
+        return;
+    }
+
+    dbStatusEl.textContent = message;
+    dbStatusEl.hidden = false;
+    dbStatusEl.classList.toggle("db-status-error", isError);
+
+    console.log("[Ruleta Firebase]", message);
+}
+
+function clearDbStatus() {
+    if (!dbStatusEl) {
+        return;
+    }
+
+    dbStatusEl.textContent = "";
+    dbStatusEl.hidden = true;
+    dbStatusEl.classList.remove("db-status-error");
 }
 
 function showError(message) {
@@ -228,21 +251,38 @@ function formatPurchaseDate() {
 }
 
 async function initFirebase() {
-    if (!USE_FIREBASE || db || typeof firebase === "undefined") {
+    if (!USE_FIREBASE) {
+        showDbStatus("Modo sin Firebase (archivo local).", true);
         return;
     }
 
-    firebase.initializeApp({
-        apiKey: "AIzaSyD4anQngP2eDrG1QCfoeSkanidlvOc6k9E",
-        authDomain: "sappari.firebaseapp.com",
-        projectId: "sappari",
-        storageBucket: "sappari.firebasestorage.app",
-        messagingSenderId: "353921307187",
-        appId: "1:353921307187:web:c475868367b1e68ee40946",
-        measurementId: "G-4X05BCVFEG"
-    });
+    if (typeof firebase === "undefined") {
+        showDbStatus("Firebase no cargó. Revisa tu conexión o bloqueadores.", true);
+        return;
+    }
 
-    db = firebase.firestore();
+    if (db) {
+        return;
+    }
+
+    try {
+        firebase.initializeApp({
+            apiKey: "AIzaSyD4anQngP2eDrG1QCfoeSkanidlvOc6k9E",
+            authDomain: "sappari.firebaseapp.com",
+            projectId: "sappari",
+            storageBucket: "sappari.firebasestorage.app",
+            messagingSenderId: "353921307187",
+            appId: "1:353921307187:web:c475868367b1e68ee40946",
+            measurementId: "G-4X05BCVFEG"
+        });
+
+        db = firebase.firestore();
+        showDbStatus("Firebase conectado al proyecto sappari.");
+    } catch (error) {
+        db = null;
+        showDbStatus("Error al iniciar Firebase. Revisa la consola.", true);
+        console.error("Firebase init:", error);
+    }
 }
 
 function participationRef(phone) {
@@ -267,6 +307,7 @@ async function saveRegistration() {
     };
 
     await participationRef(participantPhone).set(data, { merge: true });
+    showDbStatus(`Registro guardado: ${participationDocId(participantPhone)}`);
 }
 
 async function saveParticipation(prize, isWinner = false) {
@@ -285,6 +326,7 @@ async function saveParticipation(prize, isWinner = false) {
     }
 
     await participationRef(participantPhone).set(data, { merge: true });
+    showDbStatus(`Premio guardado: ${participationDocId(participantPhone)}`);
 }
 
 function randomInt(max) {
@@ -744,3 +786,12 @@ window.addEventListener("orientationchange", () => {
         }
     }, 200);
 });
+
+if (USE_FIREBASE) {
+    initFirebase().catch((error) => {
+        showDbStatus("No se pudo conectar con Firebase al cargar.", true);
+        console.error("Firebase init on load:", error);
+    });
+} else {
+    showDbStatus("Abre la página desde GitHub Pages, no como archivo local.", true);
+}
