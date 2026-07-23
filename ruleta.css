@@ -159,6 +159,17 @@ h1 {
     line-height: 1.4;
 }
 
+.db-status {
+    color: #86efac;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-top: 8px;
+}
+
+.db-status-error {
+    color: #fca5a5;
+}
+
 button {
     padding: 15px 22px;
     border: none;
