@@ -1,8 +1,11 @@
-// Modo prueba solo en local (GitHub Pages usa Firebase y validación real)
+// Modo prueba: validación relajada en local (nombre/celular opcionales)
 const TEST_MODE =
     location.protocol === "file:" ||
     location.hostname === "localhost" ||
     location.hostname === "127.0.0.1";
+
+// Firebase funciona en localhost y en producción; solo se omite al abrir el archivo directo (file://)
+const USE_FIREBASE = location.protocol !== "file:";
 
 const memoryDailyCache = new Map();
 const memorySessionCache = new Set();
@@ -225,7 +228,7 @@ function formatPurchaseDate() {
 }
 
 async function initFirebase() {
-    if (TEST_MODE || db || typeof firebase === "undefined") {
+    if (!USE_FIREBASE || db || typeof firebase === "undefined") {
         return;
     }
 
@@ -242,10 +245,28 @@ async function initFirebase() {
     db = firebase.firestore();
 }
 
+function participationRef(phone) {
+    return db.collection("participaciones").doc(participationDocId(phone));
+}
+
 async function hasPlayedToday(phone) {
-    const ref = db.collection("participaciones").doc(participationDocId(phone));
-    const snapshot = await ref.get();
-    return snapshot.exists;
+    const snapshot = await participationRef(phone).get();
+    const data = snapshot.data();
+
+    return snapshot.exists && data && data.estado === "completado";
+}
+
+async function saveRegistration() {
+    const data = {
+        nombre: participantName.trim(),
+        telefono: normalizePhone(participantPhone),
+        numeroFactura: participantInvoice,
+        fecha: getTodayKey(),
+        estado: "validado",
+        validadoEn: new Date().toISOString()
+    };
+
+    await participationRef(participantPhone).set(data, { merge: true });
 }
 
 async function saveParticipation(prize, isWinner = false) {
@@ -255,15 +276,15 @@ async function saveParticipation(prize, isWinner = false) {
         numeroFactura: participantInvoice,
         fecha: getTodayKey(),
         premio: prize,
-        registradoEn: new Date().toISOString()
+        estado: "completado",
+        giroEn: new Date().toISOString()
     };
 
     if (isWinner) {
         data.fechaCompra = formatPurchaseDate();
     }
 
-    const ref = db.collection("participaciones").doc(participationDocId(participantPhone));
-    await ref.set(data);
+    await participationRef(participantPhone).set(data, { merge: true });
 }
 
 function randomInt(max) {
@@ -595,23 +616,20 @@ function spinWheel() {
             markSpunThisSession(participantPhone);
             markPlayedTodayCache(participantPhone);
 
-            if (isRealPrize(landedIndex)) {
-                if (!TEST_MODE) {
-                    await saveParticipation(prize, true);
-                }
+            if (db) {
+                await saveParticipation(prize, isRealPrize(landedIndex));
+            }
 
+            if (isRealPrize(landedIndex)) {
                 showWinnerCelebration(prize);
             } else {
-                if (!TEST_MODE) {
-                    await saveParticipation(prize);
-                }
-
                 lockSpinButton("Participación registrada");
             }
         } catch (error) {
             clearParticipationCache(participantPhone);
-            showRuletaError("No se pudo registrar tu participación. Intenta nuevamente.");
-            console.error(error);
+            const code = error && error.code ? ` (${error.code})` : "";
+            showRuletaError(`No se pudo registrar tu participación${code}. Revisa las reglas de Firestore.`);
+            console.error("Firestore saveParticipation:", error);
             spinBtn.disabled = false;
             spinBtn.textContent = "Girar ruleta";
         } finally {
@@ -660,7 +678,9 @@ validarBtn.addEventListener("click", async () => {
                 showError("Ingresa un celular ecuatoriano válido (09XXXXXXXX).");
                 return;
             }
+        }
 
+        if (USE_FIREBASE) {
             await initFirebase();
 
             if (!db) {
@@ -677,6 +697,19 @@ validarBtn.addEventListener("click", async () => {
         participantName = nombreFinal;
         participantPhone = telefonoFinal;
         participantInvoice = factura;
+
+        if (db) {
+            try {
+                await saveRegistration();
+            } catch (error) {
+                showError(
+                    "No se pudo guardar en Firestore. Publica las reglas de firestore.rules en Firebase Console."
+                );
+                console.error("Firestore saveRegistration:", error);
+                return;
+            }
+        }
+
         showRuleta();
     } catch (error) {
         showError("Error al validar participación. Revisa tu conexión.");
